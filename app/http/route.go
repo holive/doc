@@ -33,8 +33,6 @@ func NewRouter(cfg *RouterConfig, handler *handler.Handler) http.Handler {
 		r.Delete("/{squad}/{projeto}/{versao}", handler.DeleteDocApi)
 	})
 
-	// Create a route along /files that will serve contents from
-	// the ./data/ folder.
 	workDir, _ := os.Getwd()
 	filesDir := http.Dir(filepath.Join(workDir, "documentos"))
 	fileServer(r, "/files", filesDir)

@@ -22,10 +22,6 @@ func (dr *DocApiRepository) Create(ctx context.Context, doc *docApi.DocApi) erro
 		return errors.Wrap(err, "could not create a feed")
 	}
 
-	//if err = dr.collection.FindOne(ctx, bson.M{"_id": resp.InsertedID}); err != nil {
-	//	return  errors.Wrap(err, "could not find the new doc")
-	//}
-
 	return nil
 }
 

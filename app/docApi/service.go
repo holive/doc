@@ -3,6 +3,8 @@ package docApi
 import (
 	"context"
 	"io/ioutil"
+	"log"
+	"os"
 	"path"
 
 	"github.com/pkg/errors"
@@ -29,7 +31,41 @@ func (s *Service) Create(ctx context.Context, folderPath string, filename string
 }
 
 func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
-	return s.repo.Find(ctx, doc.Squad, doc.Projeto, doc.Versao)
+	exists := true
+
+	folderPath := path.Join(FilesFolder, doc.Squad, doc.Projeto, doc.Versao)
+	filePath := path.Join(folderPath, FileName)
+	if _, err := os.Stat(filePath); err != nil {
+		if os.IsNotExist(err) {
+			exists = false
+		} else {
+			log.Printf("File %s stat error: %v", filePath, err)
+		}
+	}
+
+	doc.Doc = []byte(filePath)
+
+	if exists {
+		return doc, nil
+	}
+
+	res, err := s.repo.Find(ctx, doc.Squad, doc.Projeto, doc.Versao)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not find doc")
+	}
+
+	// write file
+	err = os.MkdirAll(folderPath, os.ModePerm)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not create the folderPath")
+	}
+
+	err = ioutil.WriteFile(filePath, res.Doc, os.ModePerm)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not write on file")
+	}
+
+	return doc, nil
 }
 
 func (s *Service) Delete(ctx context.Context, doc *DocApi) error {

@@ -1,1 +1,2 @@
-documentos
+documentos/*
+!documentos/redoc.standalone.js

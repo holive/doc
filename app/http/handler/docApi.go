@@ -18,7 +18,7 @@ func (h *Handler) CreateDocApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	folderPath := path.Join("documentos", doc.Squad, doc.Projeto, doc.Versao)
+	folderPath := path.Join(docApi.FilesFolder, doc.Squad, doc.Projeto, doc.Versao)
 
 	err = h.receiveFile(r, folderPath)
 	if err != nil {
@@ -49,7 +49,12 @@ func (h *Handler) GetDocApi(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, f)
+	respondWithJSON(w, http.StatusOK, map[string]string{
+		"squad":   f.Squad,
+		"projeto": f.Projeto,
+		"versao":  f.Versao,
+		"doc":     string(f.Doc),
+	})
 }
 
 func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {

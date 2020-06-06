@@ -1,6 +1,9 @@
 package docApi
 
-const FileName = "document.yaml"
+const (
+	FilesFolder = "documentos"
+	FileName    = "document.yaml"
+)
 
 type DocApi struct {
 	Squad   string `json:"squad" bson:"squad"`

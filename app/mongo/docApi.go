@@ -31,11 +31,27 @@ func (dr *DocApiRepository) Create(ctx context.Context, fd *docApi.DocApi) (*doc
 	return &newDoc, nil
 }
 
-func (dr *DocApiRepository) Delete(ctx context.Context, squad string, versao string, projeto string) error {
+func (dr *DocApiRepository) Find(ctx context.Context, squad string, projeto string, versao string) (*docApi.DocApi, error) {
+	var f docApi.DocApi
+
 	filter := bson.M{
 		"squad":   bson.M{"$eq": squad},
-		"versao":  bson.M{"$eq": versao},
 		"projeto": bson.M{"$eq": projeto},
+		"versao":  bson.M{"$eq": versao},
+	}
+
+	if err := dr.collection.FindOne(ctx, filter).Decode(&f); err != nil {
+		return nil, err
+	}
+
+	return &f, nil
+}
+
+func (dr *DocApiRepository) Delete(ctx context.Context, squad string, projeto string, versao string) error {
+	filter := bson.M{
+		"squad":   bson.M{"$eq": squad},
+		"projeto": bson.M{"$eq": projeto},
+		"versao":  bson.M{"$eq": versao},
 	}
 
 	_, err := dr.collection.DeleteOne(ctx, filter)

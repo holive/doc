@@ -19,8 +19,12 @@ func (s *Service) Create(ctx context.Context, doc *DocApi) (*DocApi, error) {
 	return newDoc, nil
 }
 
-func (s *Service) Delete(ctx context.Context, squad string, versao string, projeto string) error {
-	return s.repo.Delete(ctx, squad, versao, projeto)
+func (s *Service) Find(ctx context.Context, squad string, projeto string, versao string) (*DocApi, error) {
+	return s.repo.Find(ctx, squad, projeto, versao)
+}
+
+func (s *Service) Delete(ctx context.Context, squad string, projeto string, versao string) error {
+	return s.repo.Delete(ctx, squad, projeto, versao)
 }
 
 func (s *Service) FindAll(ctx context.Context, limit string, offset string) (*SearchResult, error) {

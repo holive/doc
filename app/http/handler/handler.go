@@ -19,10 +19,6 @@ type Message struct {
 }
 
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
-	health(w, r)
-}
-
-func health(w http.ResponseWriter, r *http.Request) {
 	res, err := json.Marshal(map[string]string{"status": "ok"})
 	if err != nil {
 		fmt.Println("could not Marshal health json response")

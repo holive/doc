@@ -16,19 +16,17 @@ type DocApiRepository struct {
 	collection *mongo.Collection
 }
 
-func (dr *DocApiRepository) Create(ctx context.Context, fd *docApi.DocApi) (*docApi.DocApi, error) {
-	resp, err := dr.collection.InsertOne(ctx, fd)
+func (dr *DocApiRepository) Create(ctx context.Context, doc *docApi.DocApi) error {
+	_, err := dr.collection.InsertOne(ctx, doc)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not create a feed")
+		return errors.Wrap(err, "could not create a feed")
 	}
 
-	var newDoc docApi.DocApi
+	//if err = dr.collection.FindOne(ctx, bson.M{"_id": resp.InsertedID}); err != nil {
+	//	return  errors.Wrap(err, "could not find the new doc")
+	//}
 
-	if err = dr.collection.FindOne(ctx, bson.M{"_id": resp.InsertedID}).Decode(&newDoc); err != nil {
-		return nil, errors.Wrap(err, "could not find the new doc")
-	}
-
-	return &newDoc, nil
+	return nil
 }
 
 func (dr *DocApiRepository) Find(ctx context.Context, squad string, projeto string, versao string) (*docApi.DocApi, error) {

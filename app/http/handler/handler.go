@@ -5,15 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/holive/feedado/app/feedado"
+	"github.com/holive/doc/app/doc"
 )
 
 type Handler struct {
-	Services *feedado.Services
-}
-
-type WorkerHandler struct {
-	Services *feedado.WorkerServices
+	Services *doc.Services
 }
 
 type Message struct {
@@ -23,10 +19,6 @@ type Message struct {
 }
 
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
-	health(w, r)
-}
-
-func (h *WorkerHandler) Health(w http.ResponseWriter, r *http.Request) {
 	health(w, r)
 }
 

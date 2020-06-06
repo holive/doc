@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/holive/feedado/app/http"
+	"github.com/holive/doc/app/http"
 
-	"github.com/holive/feedado/app/feedado"
+	"github.com/holive/doc/app/doc"
 	"github.com/pkg/errors"
 )
 
 func main() {
-	app, err := feedado.New()
+	app, err := doc.New()
 	if err != nil {
 		fmt.Println(errors.Wrap(err, "could not run doc").Error())
 		os.Exit(1)
@@ -27,12 +27,12 @@ func main() {
 		Router:            &http.RouterConfig{MiddlewareTimeout: app.Cfg.HTTPServer.Router.MiddlewareTimeout},
 	}, app.Services)
 	if err != nil {
-		fmt.Println(errors.Wrap(err, "could not run Feedado").Error())
+		fmt.Println(errors.Wrap(err, "could not run Doc").Error())
 		os.Exit(1)
 	}
 
 	if err := server.Start(); err != nil {
-		fmt.Println(errors.Wrap(err, "could not run Feedado").Error())
+		fmt.Println(errors.Wrap(err, "could not run Doc").Error())
 		os.Exit(1)
 	}
 }

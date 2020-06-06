@@ -2,8 +2,8 @@ package doc
 
 import (
 	"github.com/holive/doc/app/config"
+	"github.com/holive/doc/app/docApi"
 	"github.com/holive/doc/app/mongo"
-	infraHTTP "github.com/holive/gopkg/net/http"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -14,6 +14,7 @@ type Doc struct {
 }
 
 type Services struct {
+	DocApi *docApi.Service
 }
 
 func New() (*Doc, error) {
@@ -22,7 +23,7 @@ func New() (*Doc, error) {
 		f   = &Doc{}
 	)
 
-	f.Cfg, err = loadConfig("./config")
+	f.Cfg, err = loadConfig()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not load config")
 	}
@@ -32,25 +33,20 @@ func New() (*Doc, error) {
 		return nil, errors.Wrap(err, "could not initialize mongo client")
 	}
 
-	httpClient, err := initHTTPClient(f.Cfg)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not initialize http client")
-	}
-
 	logger, err := initLogger()
 	if err != nil {
 		return nil, errors.Wrap(err, "could not initialize logger")
 	}
 
-	f.Services = initServices(f.Cfg, db, httpClient, logger)
+	f.Services = initServices(f.Cfg, db, logger)
 
 	return f, nil
 }
 
-func initServices(cfg *config.Config, db *mongo.Client, client infraHTTP.Runner, logger *zap.SugaredLogger) *Services {
-
+func initServices(cfg *config.Config, db *mongo.Client, logger *zap.SugaredLogger) *Services {
+	docApiService := initDocApiService(db)
 
 	return &Services{
-
+		docApiService,
 	}
 }

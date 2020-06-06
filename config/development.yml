@@ -1,0 +1,13 @@
+HTTPServer:
+  Addr: ':8080'
+  MaxHeaderBytes: 1048576
+  IdleTimeout: 600s
+  ReadHeaderTimeout: 1s
+  ReadTimeout: 1s
+  WriteTimeout: 7s
+  Router:
+    MiddlewareTimeout: 6s
+Mongo:
+  URI: mongodb://localhost:27017
+  Database: doc
+  Timeout: 5

@@ -13,12 +13,6 @@ type Service struct {
 }
 
 func (s *Service) Create(ctx context.Context, folderPath string, filename string, document *DocApi) error {
-	//src, err := os.Open(path.Join(folderPath, filename))
-	//if err != nil {
-	//	return errors.Wrap(err, "could not open document file")
-	//}
-	//defer src.Close()
-
 	doc, err := ioutil.ReadFile(path.Join(folderPath, filename))
 	if err != nil {
 		return errors.Wrap(err, "could not open document file")

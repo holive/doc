@@ -20,13 +20,13 @@ func (h *Handler) CreateDocApi(w http.ResponseWriter, r *http.Request) {
 
 	folderPath := path.Join("documentos", doc.Squad, doc.Projeto, doc.Versao)
 
-	filename, err := h.receiveFile(r, folderPath)
+	err = h.receiveFile(r, folderPath)
 	if err != nil {
 		respondWithJSONError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	err = h.Services.DocApi.Create(r.Context(), folderPath, filename, doc)
+	err = h.Services.DocApi.Create(r.Context(), folderPath, docApi.FileName, doc)
 	if err != nil {
 		respondWithJSONError(w, http.StatusInternalServerError, err)
 		return
@@ -97,33 +97,33 @@ func (h *Handler) getDocFromRequest(r *http.Request) (*docApi.DocApi, error) {
 	}, nil
 }
 
-func (h *Handler) receiveFile(r *http.Request, folderPath string) (filename string, err error) {
-	err = r.ParseMultipartForm(2 << 20)
+func (h *Handler) receiveFile(r *http.Request, folderPath string) error {
+	err := r.ParseMultipartForm(2 << 20)
 	if err != nil {
-		return "", errors.Wrap(err, "could not parse multipart form")
+		return errors.Wrap(err, "could not parse multipart form")
 	}
 
-	src, header, err := r.FormFile("fileupload")
+	src, _, err := r.FormFile("fileupload")
 	if err != nil {
-		return "", errors.Wrap(err, "could not get src from request")
+		return errors.Wrap(err, "could not get src from request")
 	}
 	defer src.Close()
 
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {
-		return "", errors.Wrap(err, "could not create the folderPath")
+		return errors.Wrap(err, "could not create the folderPath")
 	}
 
-	dst, err := os.Create(path.Join(folderPath, header.Filename))
+	dst, err := os.Create(path.Join(folderPath, docApi.FileName))
 	if err != nil {
-		return "", errors.Wrap(err, "could not create the src")
+		return errors.Wrap(err, "could not create the src")
 	}
 
 	if _, err = io.Copy(dst, src); err != nil {
-		return "", errors.Wrap(err, "could not copy src to dst")
+		return errors.Wrap(err, "could not copy src to dst")
 	}
 
 	dst.Sync()
 
-	return header.Filename, nil
+	return nil
 }

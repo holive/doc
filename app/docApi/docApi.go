@@ -1,7 +1,7 @@
 package docApi
 
 const (
-	FilesFolder = "documentos"
+	FilesFolder = "static"
 	FileName    = "document.yaml"
 )
 

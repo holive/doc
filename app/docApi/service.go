@@ -55,7 +55,6 @@ func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
 		return nil, errors.Wrap(err, "could not find doc")
 	}
 
-	// write file
 	err = os.MkdirAll(folderPath, os.ModePerm)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create the folderPath")

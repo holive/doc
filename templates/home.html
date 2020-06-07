@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>doc</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto+Slab">
+	<link rel="stylesheet" href="/files/normalize.css">
+	<link rel="stylesheet" href="/files/milligram.css">
+	<link rel="stylesheet" href="/files/styles.css">
+</head>
+
+<body class="home">
+	<main>
+		<div class="container">
+			<div class="row">
+				<h1 class="title">doc</h1>
+			</div>
+
+			<div class="row">
+				<h3 class="subtitle">documentos cadastrados:</h3>
+			</div>
+
+			<div class="row">
+				<ul>
+	                {{range $index, $element := .DocUrls}}
+						<li>
+							<a href="/{{$element}}">{{$element}}</a>
+						</li>
+	                {{end}}
+				</ul>
+			</div>
+		</div>
+	</main>
+</body>
+</html>

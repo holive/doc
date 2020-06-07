@@ -79,7 +79,26 @@ func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, results)
+	//
+	var docUrls []string
+	for _, doc := range results.Docs {
+		filePath := path.Join(doc.Squad, doc.Projeto, doc.Versao)
+		docUrls = append(docUrls, filePath)
+	}
+
+	htmlData := templates.HomeHtml{
+		DocUrls: docUrls,
+	}
+
+	tmpl, err := template.ParseFiles(path.Join("templates", "home.html"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tmpl.Execute(w, htmlData); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *Handler) DeleteDoc(w http.ResponseWriter, r *http.Request) {

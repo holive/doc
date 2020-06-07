@@ -1,2 +1,4 @@
-documentos/*
-!documentos/redoc.standalone.js
+static/*
+!static/redoc.standalone.js
+!static/normalize.css
+!static/milligram.css

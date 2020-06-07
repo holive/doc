@@ -17,9 +17,22 @@ type DocApiRepository struct {
 }
 
 func (dr *DocApiRepository) Create(ctx context.Context, doc *docApi.DocApi) error {
-	_, err := dr.collection.InsertOne(ctx, doc)
+	filter := bson.M{
+		"squad":   bson.M{"$eq": doc.Squad},
+		"projeto": bson.M{"$eq": doc.Projeto},
+		"versao":  bson.M{"$eq": doc.Versao},
+	}
+
+	bsonDoc, err := bson.Marshal(doc)
 	if err != nil {
-		return errors.Wrap(err, "could not create a feed")
+		return errors.Wrap(err, "could not marshal bson")
+	}
+
+	opts := options.Replace().SetUpsert(true)
+
+	_, err = dr.collection.ReplaceOne(ctx, filter, bsonDoc, opts)
+	if err != nil {
+		return errors.Wrap(err, "could not create a doc")
 	}
 
 	return nil

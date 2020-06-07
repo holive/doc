@@ -1,10 +1,14 @@
 package http
 
 import (
+	"compress/gzip"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/holive/doc/app/docApi"
@@ -18,6 +22,18 @@ type RouterConfig struct {
 	MiddlewareTimeout time.Duration
 }
 
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+var gzPool = sync.Pool{
+	New: func() interface{} {
+		w := gzip.NewWriter(ioutil.Discard)
+		return w
+	},
+}
+
 func NewRouter(cfg *RouterConfig, handler *handler.Handler) http.Handler {
 	r := chi.NewRouter()
 
@@ -28,7 +44,7 @@ func NewRouter(cfg *RouterConfig, handler *handler.Handler) http.Handler {
 
 	r.Get("/health", handler.Health)
 
-	r.Route("/doc", func(r chi.Router) {
+	r.Route("/", func(r chi.Router) {
 		r.Post("/{squad}/{projeto}/{versao}", handler.CreateDoc)
 		r.Get("/", handler.GetAllDocs)
 		r.Get("/{squad}/{projeto}/{versao}", handler.GetDoc)
@@ -54,9 +70,34 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	path += "*"
 
 	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "max-age=2592000")
+
 		rctx := chi.RouteContext(r.Context())
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
-		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
-		fs.ServeHTTP(w, r)
+		handler := http.StripPrefix(pathPrefix, http.FileServer(root))
+
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			handler.ServeHTTP(w, r)
+			return
+		}
+
+		w.Header().Set("Content-Encoding", "gzip")
+
+		gz := gzPool.Get().(*gzip.Writer)
+		defer gzPool.Put(gz)
+
+		gz.Reset(w)
+		defer gz.Close()
+
+		handler.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, Writer: gz}, r)
 	})
+}
+
+func (w *gzipResponseWriter) WriteHeader(status int) {
+	w.Header().Del("Content-Length")
+	w.ResponseWriter.WriteHeader(status)
+}
+
+func (w *gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
 }

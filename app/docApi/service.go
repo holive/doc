@@ -69,6 +69,13 @@ func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
 }
 
 func (s *Service) Delete(ctx context.Context, doc *DocApi) error {
+	filePath := path.Join(FilesFolder, doc.Squad, doc.Projeto, doc.Versao, FileName)
+
+	err := os.Remove(filePath)
+	if err != nil {
+		log.Printf("could not delete %s: %v", filePath, err)
+	}
+
 	return s.repo.Delete(ctx, doc.Squad, doc.Projeto, doc.Versao)
 }
 

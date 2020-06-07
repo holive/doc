@@ -59,7 +59,11 @@ func (dr *DocApiRepository) FindAll(ctx context.Context, limit string, offset st
 		return &docApi.SearchResult{}, errors.Wrap(err, "could not get limit or offset")
 	}
 
-	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset)
+	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
+		"squad":   1,
+		"projeto": 1,
+		"versao":  1,
+	})
 
 	cur, err := dr.collection.Find(ctx, bson.D{{}}, findOptions)
 	if err != nil {

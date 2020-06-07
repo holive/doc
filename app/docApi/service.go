@@ -33,7 +33,8 @@ func (s *Service) Create(ctx context.Context, folderPath string, filename string
 func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
 	exists := true
 
-	folderPath := path.Join(FilesFolder, doc.Squad, doc.Projeto, doc.Versao)
+	routePath := path.Join(doc.Squad, doc.Projeto, doc.Versao)
+	folderPath := path.Join(FilesFolder, routePath)
 	filePath := path.Join(folderPath, FileName)
 	if _, err := os.Stat(filePath); err != nil {
 		if os.IsNotExist(err) {
@@ -43,7 +44,7 @@ func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
 		}
 	}
 
-	doc.Doc = []byte(filePath)
+	doc.Doc = []byte(path.Join(routePath, FileName))
 
 	if exists {
 		return doc, nil

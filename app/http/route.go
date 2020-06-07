@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/holive/doc/app/docApi"
+
 	"github.com/go-chi/chi"
 	chiMiddleware "github.com/go-chi/chi/middleware"
 	"github.com/holive/doc/app/http/handler"
@@ -27,14 +29,14 @@ func NewRouter(cfg *RouterConfig, handler *handler.Handler) http.Handler {
 	r.Get("/health", handler.Health)
 
 	r.Route("/doc", func(r chi.Router) {
-		r.Post("/{squad}/{projeto}/{versao}", handler.CreateDocApi)
+		r.Post("/{squad}/{projeto}/{versao}", handler.CreateDoc)
 		r.Get("/", handler.GetAllDocs)
-		r.Get("/{squad}/{projeto}/{versao}", handler.GetDocApi)
-		r.Delete("/{squad}/{projeto}/{versao}", handler.DeleteDocApi)
+		r.Get("/{squad}/{projeto}/{versao}", handler.GetDoc)
+		r.Delete("/{squad}/{projeto}/{versao}", handler.DeleteDoc)
 	})
 
 	workDir, _ := os.Getwd()
-	filesDir := http.Dir(filepath.Join(workDir, "documentos"))
+	filesDir := http.Dir(filepath.Join(workDir, docApi.FilesFolder))
 	fileServer(r, "/files", filesDir)
 
 	return r

@@ -1,17 +1,20 @@
 package handler
 
 import (
+	"html/template"
 	"io"
 	"net/http"
 	"os"
 	"path"
+
+	"github.com/holive/doc/templates"
 
 	"github.com/go-chi/chi"
 	"github.com/holive/doc/app/docApi"
 	"github.com/pkg/errors"
 )
 
-func (h *Handler) CreateDocApi(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateDoc(w http.ResponseWriter, r *http.Request) {
 	doc, err := h.getDocFromRequest(r)
 	if err != nil {
 		respondWithJSONError(w, http.StatusInternalServerError, err)
@@ -36,25 +39,34 @@ func (h *Handler) CreateDocApi(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, doc)
 }
 
-func (h *Handler) GetDocApi(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetDoc(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 	doc, err := h.getDocFromRequest(r)
 	if err != nil {
-		respondWithJSONError(w, http.StatusInternalServerError, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	f, err := h.Services.DocApi.Find(r.Context(), doc)
 	if err != nil {
-		respondWithJSONError(w, http.StatusNotFound, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, map[string]string{
-		"squad":   f.Squad,
-		"projeto": f.Projeto,
-		"versao":  f.Versao,
-		"doc":     string(f.Doc),
-	})
+	htmlData := templates.DocHtml{
+		DocUrl: string(f.Doc),
+	}
+
+	tmpl, err := template.ParseFiles(path.Join("templates", "doc.html"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tmpl.Execute(w, htmlData); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +82,7 @@ func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, results)
 }
 
-func (h *Handler) DeleteDocApi(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteDoc(w http.ResponseWriter, r *http.Request) {
 	doc, err := h.getDocFromRequest(r)
 	if err != nil {
 		respondWithJSONError(w, http.StatusInternalServerError, err)

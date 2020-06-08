@@ -19,8 +19,6 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/holive/gopkg v0.0.0-20200507025338-8ab3c86c2041
-## explicit
 # github.com/klauspost/compress v1.9.5
 github.com/klauspost/compress/fse
 github.com/klauspost/compress/huff0

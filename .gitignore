@@ -2,3 +2,4 @@ static/*
 !static/redoc.standalone.js
 !static/normalize.css
 !static/milligram.css
+dist

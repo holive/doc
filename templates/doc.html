@@ -18,12 +18,15 @@
 <script src="/files/redoc.standalone.js"></script>
 
 <script>
+    let done = false;
     new MutationObserver(((mutations) => {
+        if (done) return;
         mutations.some((mutation) => {
             const element = document.querySelector(".scrollbar-container");
 
             if (mutation.attributeName === "tabindex" && element) {
                 element.insertAdjacentHTML("beforeend", '<a href="/" style="color: #666 !important;padding: 10px 0 0 20px;display: block;font-size: 12px;" class="backHome">< ir para a Home</a>');
+                done = true;
                 return true;
             }
         });

@@ -5,6 +5,8 @@ const (
 	FileName    = "document.yaml"
 )
 
+var FileTypes = []string{".css", ".js", "json", ".yaml", ".yml"}
+
 type DocApi struct {
 	Squad   string `json:"squad" bson:"squad"`
 	Projeto string `json:"projeto" bson:"projeto"`

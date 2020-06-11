@@ -71,12 +71,17 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	path += "*"
 
 	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "max-age=2592000")
-
 		rctx := chi.RouteContext(r.Context())
+
+		if !validFilePath(rctx) {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
 		handler := http.StripPrefix(pathPrefix, http.FileServer(root))
 
+		w.Header().Set("Cache-Control", "max-age=2592000")
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			handler.ServeHTTP(w, r)
 			return
@@ -92,6 +97,16 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 
 		handler.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, Writer: gz}, r)
 	})
+}
+
+func validFilePath(rctx *chi.Context) bool {
+	for _, el := range docApi.FileTypes {
+		if strings.HasSuffix(rctx.URLParams.Values[len(rctx.URLParams.Values)-1], el) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (w *gzipResponseWriter) WriteHeader(status int) {

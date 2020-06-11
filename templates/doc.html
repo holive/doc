@@ -1,21 +1,39 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>doc</title>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
-    </style>
-  </head>
+<head>
+  <title>doc</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+<redoc spec-url="/files/{{ .DocUrl }}"></redoc>
 
-  <body>
-    <redoc spec-url="/files/{{ .DocUrl }}"></redoc>
+<script src="/files/redoc.standalone.js"></script>
 
-    <script src="/files/redoc.standalone.js"> </script>
-  </body>
+<script>
+    new MutationObserver(((mutations) => {
+        mutations.some((mutation) => {
+            const element = document.querySelector(".scrollbar-container");
+
+            if (mutation.attributeName === "tabindex" && element) {
+                element.insertAdjacentHTML("beforeend", '<a href="/" style="color: #666 !important;padding: 10px 0 0 20px;display: block;font-size: 12px;" class="backHome">< ir para a Home</a>');
+                return true;
+            }
+        });
+    })).observe(document.querySelector("redoc"), {
+        attributes: true,
+        characterData: true,
+        childList: true,
+        subtree: true,
+        attributeOldValue: true,
+    });
+</script>
+</body>
 </html>

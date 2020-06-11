@@ -7,8 +7,8 @@ APIs specifications in one place with ReDoc.
 ## how to run
 ```bash
 go get github.com/holive/doc
-cd $GOPATH/src/github.com/holive/doc
-make run
+cd $GOPATH/src/github.com/holive/doc/app/cmd
+go run main.go
 ```
 
 ## how it works

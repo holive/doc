@@ -18,5 +18,7 @@ docker:
 	&& docker rmi ${DOCKER_REGISTRY}/${SERVICE}:${TAG}
 
 run:
-	docker run -d --network host mvertes/alpine-mongo:4.0.6-1
 	docker run --network host hbliveira/doc:dev
+
+mongo:
+	docker run -d --network host mvertes/alpine-mongo:4.0.6-1

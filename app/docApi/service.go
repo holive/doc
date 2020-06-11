@@ -68,6 +68,10 @@ func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
 	return doc, nil
 }
 
+func (s *Service) FindBySquad(ctx context.Context, squad string, limit string, offset string) (*SearchResult, error) {
+	return s.repo.FindBySquad(ctx, squad, limit, offset)
+}
+
 func (s *Service) Delete(ctx context.Context, doc *DocApi) error {
 	filePath := path.Join(FilesFolder, doc.Squad, doc.Projeto, doc.Versao, FileName)
 

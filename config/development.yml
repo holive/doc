@@ -1,5 +1,5 @@
 HTTPServer:
-  Addr: ':8080'
+  Addr: ':3000'
   MaxHeaderBytes: 1048576
   IdleTimeout: 600s
   ReadHeaderTimeout: 1s

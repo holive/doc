@@ -107,6 +107,51 @@ func (dr *DocApiRepository) FindAll(ctx context.Context, limit string, offset st
 	}, nil
 }
 
+func (dr *DocApiRepository) FindBySquad(ctx context.Context, squad string, limit string, offset string) (*docApi.SearchResult, error) {
+	intLimit, intOffset, err := dr.getLimitOffset(limit, offset)
+	if err != nil {
+		return &docApi.SearchResult{}, errors.Wrap(err, "could not get limit or offset")
+	}
+
+	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
+		"squad":   1,
+		"projeto": 1,
+		"versao":  1,
+	})
+
+	filter := bson.M{
+		"squad": bson.M{"$eq": squad},
+	}
+
+	cur, err := dr.collection.Find(ctx, filter, findOptions)
+	if err != nil {
+		return &docApi.SearchResult{}, err
+	}
+
+	total, err := dr.collection.CountDocuments(ctx, bson.D{{}})
+	if err != nil {
+		return nil, errors.Wrap(err, "could not count documents")
+	}
+
+	results, err := dr.resultFromCursor(ctx, cur)
+	if err != nil {
+		return &docApi.SearchResult{}, errors.Wrap(err, "could not get results from cursor")
+	}
+
+	return &docApi.SearchResult{
+		Docs: results,
+		Result: struct {
+			Offset int64 `json:"offset"`
+			Limit  int64 `json:"limit"`
+			Total  int64 `json:"total"`
+		}{
+			Offset: intOffset,
+			Limit:  intLimit,
+			Total:  total,
+		},
+	}, nil
+}
+
 func (dr *DocApiRepository) getLimitOffset(limit string, offset string) (int64, int64, error) {
 	if offset == "" {
 		offset = "0"

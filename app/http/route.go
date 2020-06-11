@@ -45,8 +45,9 @@ func NewRouter(cfg *RouterConfig, handler *handler.Handler) http.Handler {
 	r.Get("/health", handler.Health)
 
 	r.Route("/", func(r chi.Router) {
-		r.Post("/{squad}/{projeto}/{versao}", handler.CreateDoc)
 		r.Get("/", handler.GetAllDocs)
+		r.Get("/{squad}", handler.ListBySquad)
+		r.Post("/{squad}/{projeto}/{versao}", handler.CreateDoc)
 		r.Get("/{squad}/{projeto}/{versao}", handler.GetDoc)
 		r.Delete("/{squad}/{projeto}/{versao}", handler.DeleteDoc)
 	})

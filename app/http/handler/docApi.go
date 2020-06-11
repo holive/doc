@@ -100,6 +100,37 @@ func (h *Handler) ListBySquad(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) SearchByProject(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	projeto := chi.URLParam(r, "projeto")
+	limit := r.URL.Query().Get("limit")
+	offset := r.URL.Query().Get("offset")
+
+	result, err := h.Services.DocApi.SearchProject(r.Context(), projeto, limit, offset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	htmlData := h.searchResultToTemplate(result)
+	newHtmlData, err := h.getAllSquadsToTemplate(r, htmlData, "50", "0")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles(path.Join(templates.TemplateDirectory, "search.html"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tmpl.Execute(w, newHtmlData); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
 	limit := r.URL.Query().Get("limit")
 	offset := r.URL.Query().Get("offset")
@@ -110,13 +141,8 @@ func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var squads []string
-	for _, doc := range result.Docs {
-		squads = append(squads, doc.Squad)
-	}
-
 	htmlData := h.searchResultToTemplate(result)
-	htmlData.Squads = squads
+	htmlData.Squads = h.reduceSquads(result)
 
 	tmpl, err := template.ParseFiles(path.Join(templates.TemplateDirectory, "home.html"))
 	if err != nil {
@@ -207,7 +233,8 @@ func (h *Handler) searchResultToTemplate(result *docApi.SearchResult) templates.
 	}
 
 	return templates.HomeHtml{
-		Docs: docUrls,
+		Docs:    docUrls,
+		Results: &result.Result,
 	}
 }
 
@@ -221,13 +248,22 @@ func (h *Handler) getAllSquadsToTemplate(r *http.Request,
 		return templates.HomeHtml{}, errors.Wrap(err, "error at getAllSquads")
 	}
 
-	var squads []string
-	for _, doc := range result.Docs {
-		squads = append(squads, doc.Squad)
-	}
-
 	return templates.HomeHtml{
 		Docs:   homeHtml.Docs,
-		Squads: squads,
+		Squads: h.reduceSquads(result),
 	}, nil
+}
+
+func (h *Handler) reduceSquads(docs *docApi.SearchResult) []string {
+	m := make(map[string]interface{})
+	for _, doc := range docs.Docs {
+		m[doc.Squad] = nil
+	}
+
+	var squads []string
+	for key, _ := range m {
+		squads = append(squads, key)
+	}
+
+	return squads
 }

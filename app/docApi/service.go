@@ -72,6 +72,13 @@ func (s *Service) FindBySquad(ctx context.Context, squad string, limit string, o
 	return s.repo.FindBySquad(ctx, squad, limit, offset)
 }
 
+func (s *Service) SearchProject(ctx context.Context, project string, limit string, offset string) (*SearchResult, error) {
+	if project == "" {
+		return nil, errors.New("can't search empty value")
+	}
+	return s.repo.SearchProject(ctx, project, limit, offset)
+}
+
 func (s *Service) Delete(ctx context.Context, doc *DocApi) error {
 	filePath := path.Join(FilesFolder, doc.Squad, doc.Projeto, doc.Versao, FileName)
 

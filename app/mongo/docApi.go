@@ -4,17 +4,24 @@ import (
 	"context"
 	"strconv"
 
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/holive/doc/app/docApi"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DocApiRepository struct {
 	collection *mongo.Collection
 }
+
+const (
+	Squad   = "squad"
+	Projeto = "projeto"
+	Versao  = "versao"
+)
 
 func (dr *DocApiRepository) Create(ctx context.Context, doc *docApi.DocApi) error {
 	filter := bson.M{
@@ -42,9 +49,9 @@ func (dr *DocApiRepository) Find(ctx context.Context, squad string, projeto stri
 	var f docApi.DocApi
 
 	filter := bson.M{
-		"squad":   bson.M{"$eq": squad},
-		"projeto": bson.M{"$eq": projeto},
-		"versao":  bson.M{"$eq": versao},
+		Squad:   bson.M{"$eq": squad},
+		Projeto: bson.M{"$eq": projeto},
+		Versao:  bson.M{"$eq": versao},
 	}
 
 	if err := dr.collection.FindOne(ctx, filter).Decode(&f); err != nil {
@@ -56,9 +63,9 @@ func (dr *DocApiRepository) Find(ctx context.Context, squad string, projeto stri
 
 func (dr *DocApiRepository) Delete(ctx context.Context, squad string, projeto string, versao string) error {
 	filter := bson.M{
-		"squad":   bson.M{"$eq": squad},
-		"projeto": bson.M{"$eq": projeto},
-		"versao":  bson.M{"$eq": versao},
+		Squad:   bson.M{"$eq": squad},
+		Projeto: bson.M{"$eq": projeto},
+		Versao:  bson.M{"$eq": versao},
 	}
 
 	_, err := dr.collection.DeleteOne(ctx, filter)
@@ -73,9 +80,9 @@ func (dr *DocApiRepository) FindAll(ctx context.Context, limit string, offset st
 	}
 
 	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
-		"squad":   1,
-		"projeto": 1,
-		"versao":  1,
+		Squad:   1,
+		Projeto: 1,
+		Versao:  1,
 	})
 
 	cur, err := dr.collection.Find(ctx, bson.D{{}}, findOptions)
@@ -93,18 +100,7 @@ func (dr *DocApiRepository) FindAll(ctx context.Context, limit string, offset st
 		return &docApi.SearchResult{}, errors.Wrap(err, "could not get results from cursor")
 	}
 
-	return &docApi.SearchResult{
-		Docs: results,
-		Result: struct {
-			Offset int64 `json:"offset"`
-			Limit  int64 `json:"limit"`
-			Total  int64 `json:"total"`
-		}{
-			Offset: intOffset,
-			Limit:  intLimit,
-			Total:  total,
-		},
-	}, nil
+	return dr.returnSearchResult(results, intOffset, intLimit, total), nil
 }
 
 func (dr *DocApiRepository) FindBySquad(ctx context.Context, squad string, limit string, offset string) (*docApi.SearchResult, error) {
@@ -114,13 +110,13 @@ func (dr *DocApiRepository) FindBySquad(ctx context.Context, squad string, limit
 	}
 
 	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
-		"squad":   1,
-		"projeto": 1,
-		"versao":  1,
+		Squad:   1,
+		Projeto: 1,
+		Versao:  1,
 	})
 
 	filter := bson.M{
-		"squad": bson.M{"$eq": squad},
+		Squad: bson.M{"$eq": squad},
 	}
 
 	cur, err := dr.collection.Find(ctx, filter, findOptions)
@@ -128,7 +124,7 @@ func (dr *DocApiRepository) FindBySquad(ctx context.Context, squad string, limit
 		return &docApi.SearchResult{}, err
 	}
 
-	total, err := dr.collection.CountDocuments(ctx, bson.D{{}})
+	total, err := dr.collection.CountDocuments(ctx, filter)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not count documents")
 	}
@@ -138,18 +134,41 @@ func (dr *DocApiRepository) FindBySquad(ctx context.Context, squad string, limit
 		return &docApi.SearchResult{}, errors.Wrap(err, "could not get results from cursor")
 	}
 
-	return &docApi.SearchResult{
-		Docs: results,
-		Result: struct {
-			Offset int64 `json:"offset"`
-			Limit  int64 `json:"limit"`
-			Total  int64 `json:"total"`
-		}{
-			Offset: intOffset,
-			Limit:  intLimit,
-			Total:  total,
-		},
-	}, nil
+	return dr.returnSearchResult(results, intOffset, intLimit, total), nil
+}
+
+func (dr *DocApiRepository) SearchProject(ctx context.Context, project string, limit string, offset string) (*docApi.SearchResult, error) {
+	intLimit, intOffset, err := dr.getLimitOffset(limit, offset)
+	if err != nil {
+		return &docApi.SearchResult{}, errors.Wrap(err, "could not get limit or offset")
+	}
+
+	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
+		Squad:   1,
+		Projeto: 1,
+		Versao:  1,
+	})
+
+	filter := bson.M{
+		Projeto: primitive.Regex{Pattern: project, Options: "i"},
+	}
+
+	cur, err := dr.collection.Find(ctx, filter, findOptions)
+	if err != nil {
+		return &docApi.SearchResult{}, err
+	}
+
+	total, err := dr.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not count documents")
+	}
+
+	results, err := dr.resultFromCursor(ctx, cur)
+	if err != nil {
+		return &docApi.SearchResult{}, errors.Wrap(err, "could not get results from cursor")
+	}
+
+	return dr.returnSearchResult(results, intOffset, intLimit, total), nil
 }
 
 func (dr *DocApiRepository) getLimitOffset(limit string, offset string) (int64, int64, error) {
@@ -158,7 +177,7 @@ func (dr *DocApiRepository) getLimitOffset(limit string, offset string) (int64, 
 	}
 
 	if limit == "" {
-		limit = "24"
+		limit = "6"
 	}
 
 	intOffset, err := strconv.Atoi(offset)
@@ -197,5 +216,20 @@ func (dr *DocApiRepository) resultFromCursor(ctx context.Context, cur *mongo.Cur
 func NewDocApiRepository(conn *Client) *DocApiRepository {
 	return &DocApiRepository{
 		collection: conn.db.Collection(DocApiCollection),
+	}
+}
+
+func (dr *DocApiRepository) returnSearchResult(results []docApi.DocApi, offset int64, limit int64, total int64) *docApi.SearchResult {
+	return &docApi.SearchResult{
+		Docs: results,
+		Result: struct {
+			Offset int64 `json:"offset"`
+			Limit  int64 `json:"limit"`
+			Total  int64 `json:"total"`
+		}{
+			Offset: offset,
+			Limit:  limit,
+			Total:  total,
+		},
 	}
 }

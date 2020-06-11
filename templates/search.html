@@ -23,16 +23,7 @@
 
     <div class="row">
       <div class="column column-50">
-        <h3 class="subtitle">squad | projeto | versão</h3>
-      </div>
-
-      <div class="column column-25 column-offset-25 select">
-        <select id="select" onchange="goToSquad()">
-          <option value="" disabled selected style="display:none;">listar squads</option>
-            {{range $index, $element := .Squads}}
-              <option value="{{$element}}">{{$element}}</option>
-            {{end}}
-        </select>
+        <h3 class="subtitle">resultados para</h3>
       </div>
     </div>
 
@@ -48,11 +39,9 @@
   </div>
 </main>
 <script>
-    // select
-    let pathname = window.location.pathname.split("/");
-    if (pathname.length === 2 && pathname[1] !== "") {
-        document.getElementById("select").selectedIndex = document.querySelector('option[value="' + pathname[pathname.length - 1] + '"]').index;
-    }
+    // subtitle
+    pathname = window.location.pathname.split("/");
+    document.querySelector(".subtitle").insertAdjacentText("beforeend", " \"" + pathname[pathname.length - 1] + "\"");
 
     // busca
     let busca = document.getElementById("busca").addEventListener("keydown", function(e) {
@@ -60,11 +49,6 @@
             window.location = "/search/" + document.getElementById("busca").value.trim().toLowerCase();
         }
     });
-
-    function goToSquad() {
-        var selectElement = document.getElementsByTagName("select")[0];
-        window.location = document.getElementsByTagName("select")[0].options[selectElement.selectedIndex].value;
-    }
 </script>
 </body>
 </html>

@@ -83,7 +83,7 @@ func (h *Handler) ListBySquad(w http.ResponseWriter, r *http.Request) {
 	}
 
 	htmlData := h.searchResultToTemplate(result)
-	newHtmlData, err := h.getAllSquadsToTemplate(r, htmlData, "50", "0")
+	newHtmlData, err := h.getAllSquadsToTemplate(r, htmlData, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -114,7 +114,7 @@ func (h *Handler) SearchByProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	htmlData := h.searchResultToTemplate(result)
-	newHtmlData, err := h.getAllSquadsToTemplate(r, htmlData, "50", "0")
+	newHtmlData, err := h.getAllSquadsToTemplate(r, htmlData, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -142,7 +142,11 @@ func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	htmlData := h.searchResultToTemplate(result)
-	htmlData.Squads = h.reduceSquads(result)
+	newHtmlData, err := h.getAllSquadsToTemplate(r, htmlData, limit, offset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	tmpl, err := template.ParseFiles(path.Join(templates.TemplateDirectory, "home.html"))
 	if err != nil {
@@ -150,7 +154,7 @@ func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := tmpl.Execute(w, htmlData); err != nil {
+	if err := tmpl.Execute(w, newHtmlData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -234,7 +238,7 @@ func (h *Handler) searchResultToTemplate(result *docApi.SearchResult) templates.
 
 	return templates.HomeHtml{
 		Docs:    docUrls,
-		Results: &result.Result,
+		Results: result.Result,
 	}
 }
 
@@ -243,14 +247,16 @@ func (h *Handler) getAllSquadsToTemplate(r *http.Request,
 	limit string,
 	offset string) (templates.HomeHtml, error) {
 
-	result, err := h.Services.DocApi.FindAll(r.Context(), limit, offset)
+	// limit squad list on select filter
+	result, err := h.Services.DocApi.FindAll(r.Context(), "30", "0")
 	if err != nil {
 		return templates.HomeHtml{}, errors.Wrap(err, "error at getAllSquads")
 	}
 
 	return templates.HomeHtml{
-		Docs:   homeHtml.Docs,
-		Squads: h.reduceSquads(result),
+		Docs:    homeHtml.Docs,
+		Squads:  h.reduceSquads(result),
+		Results: homeHtml.Results,
 	}, nil
 }
 

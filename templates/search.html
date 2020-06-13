@@ -36,19 +36,32 @@
           {{end}}
       </ul>
     </div>
+
+    <div id="pagination" class="row">
+      <div class="pagination">
+        <a href="#" class="prev">&laquo;</a>
+
+        <div id="page-numbers"></div>
+
+        <a href="#" class="next">&raquo;</a>
+      </div>
+    </div>
   </div>
 </main>
+
 <script>
+    /*
+    /* pagination
+    */
+    const backEndOffset = {{ .Results.Offset }};
+    const limit = {{ .Results.Limit }};
+    const total = {{ .Results.Total }};
+
     // subtitle
     pathname = window.location.pathname.split("/");
     document.querySelector(".subtitle").insertAdjacentText("beforeend", " \"" + pathname[pathname.length - 1] + "\"");
-
-    // busca
-    let busca = document.getElementById("busca").addEventListener("keydown", function(e) {
-        if (e.keyCode === 13 || e.which === 13) {
-            window.location = "/search/" + document.getElementById("busca").value.trim().toLowerCase();
-        }
-    });
 </script>
+
+<script src="/files/scripts.js"></script>
 </body>
 </html>

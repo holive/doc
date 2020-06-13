@@ -2,4 +2,6 @@ static/*
 !static/redoc.standalone.js
 !static/normalize.css
 !static/milligram.css
+!static/scripts.js
+!static/styles.css
 dist

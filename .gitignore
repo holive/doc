@@ -5,3 +5,5 @@ static/*
 !static/scripts.js
 !static/styles.css
 dist
+.idea
+idea

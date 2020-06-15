@@ -1,7 +1,21 @@
 package doc
 
-import "github.com/holive/doc/app/config"
+import (
+	"os"
+
+	"github.com/holive/doc/app/config"
+)
 
 func loadConfig() (*config.Config, error) {
-	return config.New()
+	cfg, err := config.New()
+	if err != nil {
+		return nil, err
+	}
+
+	connectionString := os.Getenv("MONGO_CONNECTION_STRING")
+	if connectionString != "" {
+		cfg.Mongo.URI = connectionString
+	}
+
+	return cfg, nil
 }

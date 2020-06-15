@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"context"
 	"html/template"
 	"io"
 	"net/http"
 	"os"
 	"path"
+
+	"github.com/holive/doc/app/squads"
 
 	"github.com/holive/doc/templates"
 
@@ -15,9 +18,15 @@ import (
 )
 
 func (h *Handler) CreateDoc(w http.ResponseWriter, r *http.Request) {
-	doc, err := h.getDocFromRequest(r)
+	doc, err := getDocFromRequest(r)
 	if err != nil {
 		respondWithJSONError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	authorized, err := h.isAuthorized(r, doc.Squad)
+	if !authorized || err != nil {
+		respondWithJSONError(w, http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -42,7 +51,7 @@ func (h *Handler) CreateDoc(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetDoc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	doc, err := h.getDocFromRequest(r)
+	doc, err := getDocFromRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -160,9 +169,15 @@ func (h *Handler) GetAllDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteDoc(w http.ResponseWriter, r *http.Request) {
-	doc, err := h.getDocFromRequest(r)
+	doc, err := getDocFromRequest(r)
 	if err != nil {
 		respondWithJSONError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	authorized, err := h.isAuthorized(r, doc.Squad)
+	if !authorized || err != nil {
+		respondWithJSONError(w, http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -174,7 +189,24 @@ func (h *Handler) DeleteDoc(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{})
 }
 
-func (h *Handler) getDocFromRequest(r *http.Request) (*docApi.DocApi, error) {
+func (h *Handler) isAuthorized(r *http.Request, squad string) (bool, error) {
+	key := r.Header.Get(docApi.SquadKey)
+	if key == "" {
+		return false, nil
+	}
+
+	authorized, err := h.Services.Squads.VerifyUserKey(context.Background(), squads.Squad{
+		Name: squad,
+		Key:  key,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return authorized, nil
+}
+
+func getDocFromRequest(r *http.Request) (*docApi.DocApi, error) {
 	squad := chi.URLParam(r, "squad")
 	projeto := chi.URLParam(r, "projeto")
 	versao := chi.URLParam(r, "versao")
@@ -270,10 +302,10 @@ func (h *Handler) reduceSquads(docs *docApi.SearchResult) []string {
 		m[doc.Squad] = nil
 	}
 
-	var squads []string
+	var sqds []string
 	for key, _ := range m {
-		squads = append(squads, key)
+		sqds = append(sqds, key)
 	}
 
-	return squads
+	return sqds
 }

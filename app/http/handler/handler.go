@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/holive/doc/app/doc"
+	"github.com/pkg/errors"
 )
 
 type Handler struct {
@@ -29,6 +30,10 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 }
 
 func respondWithJSONError(w http.ResponseWriter, code int, err error) {
+	if err == nil {
+		err = errors.New("")
+	}
+
 	payload := map[string]interface{}{
 		"error": err.Error(),
 	}

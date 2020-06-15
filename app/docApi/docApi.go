@@ -3,6 +3,7 @@ package docApi
 const (
 	FilesFolder = "static"
 	FileName    = "document.yaml"
+	SquadKey    = "X-Squad-Key"
 )
 
 var FileTypes = []string{".css", ".js", "json", ".yaml", ".yml"}

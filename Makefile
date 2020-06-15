@@ -1,5 +1,5 @@
 PROJECT_NAME = doc
-PROJECT_TAG = dev
+PROJECT_TAG = latest
 DOCKER_IMAGE = hbliveira/doc
 
 build:
@@ -15,7 +15,7 @@ docker:
 	cd $(PWD)/dist \
 	&& docker build -t $(DOCKER_IMAGE):$(PROJECT_TAG) -f $(PWD)/infra/docker/$(PROJECT_NAME)/Dockerfile . \
 	&& docker push $(DOCKER_IMAGE):$(PROJECT_TAG) \
-	&& docker rmi ${DOCKER_REGISTRY}/${SERVICE}:${TAG}
+	&& docker rmi ${DOCKER_IMAGE}:${PROJECT_TAG}
 
 run:
 	docker run --network host hbliveira/doc:dev

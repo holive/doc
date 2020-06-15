@@ -183,6 +183,10 @@ func (h *Handler) getDocFromRequest(r *http.Request) (*docApi.DocApi, error) {
 		return nil, errors.New("missing url param")
 	}
 
+	if squad == "squad" {
+		return nil, errors.New("cannot use \"squad\" as squad name")
+	}
+
 	return &docApi.DocApi{
 		Squad:   squad,
 		Projeto: projeto,

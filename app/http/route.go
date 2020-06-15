@@ -53,6 +53,10 @@ func NewRouter(cfg *RouterConfig, handler *handler.Handler) http.Handler {
 		r.Delete("/{squad}/{projeto}/{versao}", handler.DeleteDoc)
 	})
 
+	r.Route("/squad", func(r chi.Router) {
+		r.Post("/", handler.CreateSquad)
+	})
+
 	workDir, _ := os.Getwd()
 	filesDir := http.Dir(filepath.Join(workDir, docApi.FilesFolder))
 	fileServer(r, "/files", filesDir)

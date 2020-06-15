@@ -25,9 +25,9 @@ const (
 
 func (dr *DocApiRepository) Create(ctx context.Context, doc *docApi.DocApi) error {
 	filter := bson.M{
-		"squad":   bson.M{"$eq": doc.Squad},
-		"projeto": bson.M{"$eq": doc.Projeto},
-		"versao":  bson.M{"$eq": doc.Versao},
+		Squad:   bson.M{"$eq": doc.Squad},
+		Projeto: bson.M{"$eq": doc.Projeto},
+		Versao:  bson.M{"$eq": doc.Versao},
 	}
 
 	bsonDoc, err := bson.Marshal(doc)
@@ -213,12 +213,6 @@ func (dr *DocApiRepository) resultFromCursor(ctx context.Context, cur *mongo.Cur
 	return results, nil
 }
 
-func NewDocApiRepository(conn *Client) *DocApiRepository {
-	return &DocApiRepository{
-		collection: conn.db.Collection(DocApiCollection),
-	}
-}
-
 func (dr *DocApiRepository) returnSearchResult(results []docApi.DocApi, offset int64, limit int64, total int64) *docApi.SearchResult {
 	return &docApi.SearchResult{
 		Docs: results,
@@ -231,5 +225,11 @@ func (dr *DocApiRepository) returnSearchResult(results []docApi.DocApi, offset i
 			Limit:  limit,
 			Total:  total,
 		},
+	}
+}
+
+func NewDocApiRepository(conn *Client) *DocApiRepository {
+	return &DocApiRepository{
+		collection: conn.db.Collection(DocApiCollection),
 	}
 }

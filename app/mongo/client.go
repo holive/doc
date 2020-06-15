@@ -13,6 +13,7 @@ import (
 
 const (
 	DocApiCollection = "doc_api"
+	SquadsCollection = "squads"
 )
 
 type Client struct {

@@ -11,19 +11,33 @@ cd $GOPATH/src/github.com/holive/doc/app/cmd
 go run main.go
 ```
 
+There is also a Docker image:
+
+```bash
+docker run -p 3000:3000 hbliveira/doc
+```
+
 ## how it works
 
-### create
-Endpoint: `POST http://localhost:8080/{squad}/{project}/{version}`
+*You need a squad key to be able to create or delete a doc. So get your squad key (replace <squad-name> by whatever):
 ```bash
-curl -F "fileupload=@api-document.yaml" http://localhost:8080/matrix/new/v1
+curl -X POST --data '{"name": "<squad-name>"}' http://localhost:3000/squad
+```
+
+### create
+Endpoint: `POST http://localhost:3000/{your-squad-name}/{project}/{version}`
+```bash
+curl -F "fileupload=@redoc.yaml" http://localhost:3000/{your-squad-name}/{project}/{version} -H 'x-squad-key: <your-squad-key>'
 ```
 
 ### delete
-Endpoint: `DELETE http://localhost:8080/{squad}/{project}/{version}`
-
+Endpoint: `DELETE http://localhost:3000/{your-squad-name}/{project}/{version}`
+```bash
+curl -X DELETE http://localhost:3000/{your-squad-name}/{project}/{version} -H 'x-squad-key: <your-squad-key>'
+```
+  
 ### see one
-Endpoint: `GET http://localhost:8080/{squad}/{project}/{version}`
+Endpoint: `GET http://localhost:3000/{your-squad-name}/{project}/{version}`
 
 ### see all
-Endpoint: `GET http://localhost:8080/`
+Endpoint: `GET http://localhost:3000/`

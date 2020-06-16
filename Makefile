@@ -18,7 +18,7 @@ docker:
 	&& docker rmi ${DOCKER_IMAGE}:${PROJECT_TAG}
 
 run:
-	docker run --network host hbliveira/doc:dev
+	docker run --network host hbliveira/doc:${PROJECT_TAG}
 
 mongo:
 	docker run -d --network host mvertes/alpine-mongo:4.0.6-1

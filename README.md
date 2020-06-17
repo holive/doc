@@ -36,8 +36,8 @@ Endpoint: `DELETE http://localhost:3000/{your-squad-name}/{project}/{version}`
 curl -X DELETE http://localhost:3000/{your-squad-name}/{project}/{version} -H 'x-squad-key: <your-squad-key>'
 ```
   
-### see one
+### get one
 Endpoint: `GET http://localhost:3000/{your-squad-name}/{project}/{version}`
 
-### see all
+### get all
 Endpoint: `GET http://localhost:3000/`

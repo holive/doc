@@ -92,7 +92,7 @@ function createPaginationButtons() {
 /* select
 */
 let pathname = window.location.pathname.split("/");
-if (pathname.length === 2 && pathname[1] !== "") {
+if (pathname.length === 3 && pathname[2] !== "" && pathname[1] === "squad") {
     document.getElementById("select").selectedIndex = document.querySelector('option[value="' + pathname[pathname.length - 1] + '"]').index;
 }
 

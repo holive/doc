@@ -4,7 +4,7 @@
 
 APIs specifications in one place with ReDoc.
 
-## how to run
+## How to run
 ```bash
 go get github.com/holive/doc
 cd $GOPATH/src/github.com/holive/doc/app/cmd
@@ -14,30 +14,31 @@ go run main.go
 There is also a Docker image:
 
 ```bash
-docker run -p 3000:3000 hbliveira/doc
+docker run -e MONGO_CONNECTION_STRING="your-connection-string" -p 3000:3000 hbliveira/doc
 ```
 
-## how it works
+## How it works
 
-*You need a squad key to be able to create or delete a doc. So get your squad key (replace <squad-name> by whatever):
+**You need a squad key to be able to create or delete a doc**. 
+So get your squad key:
 ```bash
-curl -X POST --data '{"name": "<squad-name>"}' http://localhost:3000/squad
+curl -X POST --data '{"name": "<your-squad-name>"}' http://localhost:3000/squad
 ```
 
-### create
-Endpoint: `POST http://localhost:3000/{your-squad-name}/{project}/{version}`
+### Create
+Endpoint: `POST http://localhost:3000/{project}/{version}`
 ```bash
-curl -F "fileupload=@redoc.yaml" http://localhost:3000/{your-squad-name}/{project}/{version} -H 'x-squad-key: <your-squad-key>'
+curl -F 'fileupload=@redoc.yaml' -F 'squad=<your-squad-name>' -F "descricao=<optional-description>" http://localhost:3000/{project}/{version} -H 'X-Squad-Key: <your-squad-key>'
 ```
 
-### delete
-Endpoint: `DELETE http://localhost:3000/{your-squad-name}/{project}/{version}`
+### Delete
+Endpoint: `DELETE http://localhost:3000/{project}/{version}`
 ```bash
-curl -X DELETE http://localhost:3000/{your-squad-name}/{project}/{version} -H 'x-squad-key: <your-squad-key>'
+curl -X DELETE http://localhost:3000/{project}/{version} -F 'squad=<your-squad-name>' -H 'X-Squad-Key: <your-squad-key>'
 ```
-  
-### get one
-Endpoint: `GET http://localhost:3000/{your-squad-name}/{project}/{version}`
+ 
+### Get
+Endpoint: `GET http://localhost:3000/{project}/{version}`
 
-### get all
-Endpoint: `GET http://localhost:3000/`
+### List
+Endpoint: `GET http://localhost:3000`

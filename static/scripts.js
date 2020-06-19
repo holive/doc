@@ -105,5 +105,5 @@ let busca = document.getElementById("busca").addEventListener("keydown", functio
 
 function goToSquad() {
     var selectElement = document.getElementsByTagName("select")[0];
-    window.location = "/" + document.getElementsByTagName("select")[0].options[selectElement.selectedIndex].value;
+    window.location = "/squad/" + document.getElementsByTagName("select")[0].options[selectElement.selectedIndex].value;
 }

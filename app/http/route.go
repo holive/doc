@@ -46,15 +46,15 @@ func NewRouter(cfg *RouterConfig, handler *handler.Handler) http.Handler {
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", handler.GetAllDocs)
-		r.Get("/{squad}", handler.ListBySquad)
 		r.Get("/search/{projeto}", handler.SearchByProject)
-		r.Get("/{squad}/{projeto}/{versao}", handler.GetDoc)
-		r.Post("/{squad}/{projeto}/{versao}", handler.CreateDoc)
-		r.Delete("/{squad}/{projeto}/{versao}", handler.DeleteDoc)
+		r.Get("/{projeto}/{versao}", handler.GetDoc)
+		r.Post("/{projeto}/{versao}", handler.CreateDoc)
+		r.Delete("/{projeto}/{versao}", handler.DeleteDoc)
 	})
 
 	r.Route("/squad", func(r chi.Router) {
 		r.Post("/", handler.CreateSquad)
+		r.Get("/{squad}", handler.ListBySquad)
 	})
 
 	workDir, _ := os.Getwd()

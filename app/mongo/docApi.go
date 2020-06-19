@@ -18,9 +18,10 @@ type DocApiRepository struct {
 }
 
 const (
-	Squad   = "squad"
-	Projeto = "projeto"
-	Versao  = "versao"
+	Squad     = "squad"
+	Projeto   = "projeto"
+	Versao    = "versao"
+	Descricao = "descricao"
 )
 
 func (dr *DocApiRepository) Create(ctx context.Context, doc *docApi.DocApi) error {
@@ -45,11 +46,10 @@ func (dr *DocApiRepository) Create(ctx context.Context, doc *docApi.DocApi) erro
 	return nil
 }
 
-func (dr *DocApiRepository) Find(ctx context.Context, squad string, projeto string, versao string) (*docApi.DocApi, error) {
+func (dr *DocApiRepository) Find(ctx context.Context, projeto string, versao string) (*docApi.DocApi, error) {
 	var f docApi.DocApi
 
 	filter := bson.M{
-		Squad:   bson.M{"$eq": squad},
 		Projeto: bson.M{"$eq": projeto},
 		Versao:  bson.M{"$eq": versao},
 	}
@@ -80,9 +80,10 @@ func (dr *DocApiRepository) FindAll(ctx context.Context, limit string, offset st
 	}
 
 	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
-		Squad:   1,
-		Projeto: 1,
-		Versao:  1,
+		Squad:     1,
+		Projeto:   1,
+		Versao:    1,
+		Descricao: 1,
 	})
 
 	cur, err := dr.collection.Find(ctx, bson.D{{}}, findOptions)
@@ -110,9 +111,10 @@ func (dr *DocApiRepository) FindBySquad(ctx context.Context, squad string, limit
 	}
 
 	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
-		Squad:   1,
-		Projeto: 1,
-		Versao:  1,
+		Squad:     1,
+		Projeto:   1,
+		Versao:    1,
+		Descricao: 1,
 	})
 
 	filter := bson.M{
@@ -144,9 +146,10 @@ func (dr *DocApiRepository) SearchProject(ctx context.Context, project string, l
 	}
 
 	findOptions := options.Find().SetLimit(intLimit).SetSkip(intOffset).SetProjection(bson.M{
-		Squad:   1,
-		Projeto: 1,
-		Versao:  1,
+		Squad:     1,
+		Projeto:   1,
+		Versao:    1,
+		Descricao: 1,
 	})
 
 	filter := bson.M{

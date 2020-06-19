@@ -35,6 +35,10 @@ select:hover {
 }
 
 /* pagination */
+#pagination {
+    margin-bottom: 50px;
+}
+
 .pagination {
     display: block;
     margin: 0 auto;
@@ -93,7 +97,5 @@ select:hover {
 }
 
 @media (min-width: 641px) {
-    .row .select {
-        padding-right: 0;
-    }
+
 }

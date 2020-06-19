@@ -14,11 +14,15 @@
 <main>
   <div class="container">
     <div class="row">
-      <h1 class="title"><a href="/">doc</a></h1>
+      <div class="column">
+        <h1 class="title"><a href="/">doc</a></h1>
+      </div>
     </div>
 
     <div class="row">
-      <input id="busca" type="text" placeholder="buscar projeto" style="margin-bottom: 40px;margin-top: 15px;">
+      <div class="column">
+        <input id="busca" type="text" placeholder="buscar" style="margin-bottom: 40px;margin-top: 15px;">
+      </div>
     </div>
 
     <div class="row">
@@ -28,13 +32,28 @@
     </div>
 
     <div class="row">
-      <ul>
+      <div class="column">
+        <table>
+          <thead>
+          <tr>
+            <th>Projeto</th>
+            <th>Versão</th>
+            <th>Squad</th>
+            <th>Descrição</th>
+          </tr>
+          </thead>
+          <tbody>
           {{range $index, $element := .Docs}}
-            <li>
-              <a href="/{{$element.DocUrl}}">{{$element.Squad}} > {{$element.Projeto}} > {{$element.Versao}}</a>
-            </li>
+            <tr>
+              <td><a href="/{{$element.DocUrl}}">{{$element.Projeto}}</a></td>
+              <td>{{$element.Versao}}</td>
+              <td>{{$element.Squad}}</td>
+              <td>{{$element.Descricao}}</td>
+            </tr>
           {{end}}
-      </ul>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div id="pagination" class="row">

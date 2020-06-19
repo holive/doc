@@ -13,8 +13,9 @@ type HomeHtml struct {
 }
 
 type DocHtml struct {
-	Squad   string
-	Projeto string
-	Versao  string
-	DocUrl  string
+	Squad     string
+	Projeto   string
+	Versao    string
+	Descricao string
+	DocUrl    string
 }

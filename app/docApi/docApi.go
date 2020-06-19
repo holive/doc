@@ -9,10 +9,11 @@ const (
 var FileTypes = []string{".css", ".js", "json", ".yaml", ".yml"}
 
 type DocApi struct {
-	Squad   string `json:"squad" bson:"squad"`
-	Projeto string `json:"projeto" bson:"projeto"`
-	Versao  string `json:"versao"bson:"versao"`
-	Doc     []byte `json:"doc,omitempty"bson:"doc"`
+	Squad     string `json:"squad" bson:"squad"`
+	Projeto   string `json:"projeto" bson:"projeto"`
+	Versao    string `json:"versao"bson:"versao"`
+	Descricao string `json:"descricao"bson:"descricao"`
+	Doc       []byte `json:"doc,omitempty"bson:"doc"`
 }
 
 type SearchResult struct {

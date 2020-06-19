@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/holive/doc/app/squads"
 
@@ -30,7 +31,7 @@ func (h *Handler) CreateDoc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	folderPath := path.Join(docApi.FilesFolder, doc.Squad, doc.Projeto, doc.Versao)
+	folderPath := path.Join(docApi.FilesFolder, doc.Projeto, doc.Versao)
 
 	err = h.receiveFile(r, folderPath)
 	if err != nil {
@@ -49,16 +50,26 @@ func (h *Handler) CreateDoc(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetDoc(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	projeto := chi.URLParam(r, "projeto")
+	versao := chi.URLParam(r, "versao")
 
-	doc, err := getDocFromRequest(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if projeto == "" || versao == "" {
+		http.Error(w, "missing path url", http.StatusBadRequest)
 		return
+	}
+
+	doc := &docApi.DocApi{
+		Projeto: projeto,
+		Versao:  versao,
 	}
 
 	f, err := h.Services.DocApi.Find(r.Context(), doc)
 	if err != nil {
+		if strings.Contains(err.Error(), "no documents in result") {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -73,6 +84,7 @@ func (h *Handler) GetDoc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := tmpl.Execute(w, htmlData); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -207,23 +219,25 @@ func (h *Handler) isAuthorized(r *http.Request, squad string) (bool, error) {
 }
 
 func getDocFromRequest(r *http.Request) (*docApi.DocApi, error) {
-	squad := chi.URLParam(r, "squad")
+	squad := r.FormValue("squad")
 	projeto := chi.URLParam(r, "projeto")
 	versao := chi.URLParam(r, "versao")
+	descricao := r.FormValue("descricao")
 
-	if squad == "" || projeto == "" || versao == "" {
+	if projeto == "" || versao == "" {
 		return nil, errors.New("missing url param")
 	}
 
-	if squad == "squad" {
-		return nil, errors.New("cannot use \"squad\" as squad name")
+	if squad == "" {
+		return nil, errors.New("missing squad")
 	}
 
 	return &docApi.DocApi{
-		Squad:   squad,
-		Projeto: projeto,
-		Versao:  versao,
-		Doc:     nil,
+		Squad:     squad,
+		Projeto:   projeto,
+		Versao:    versao,
+		Descricao: descricao,
+		Doc:       nil,
 	}, nil
 }
 
@@ -259,21 +273,22 @@ func (h *Handler) receiveFile(r *http.Request, folderPath string) error {
 }
 
 func (h *Handler) searchResultToTemplate(result *docApi.SearchResult) templates.HomeHtml {
-	var docUrls []templates.DocHtml
+	var docs []templates.DocHtml
 
 	for _, doc := range result.Docs {
-		filePath := path.Join(doc.Squad, doc.Projeto, doc.Versao)
+		filePath := path.Join(doc.Projeto, doc.Versao)
 
-		docUrls = append(docUrls, templates.DocHtml{
-			Squad:   doc.Squad,
-			Projeto: doc.Projeto,
-			Versao:  doc.Versao,
-			DocUrl:  filePath,
+		docs = append(docs, templates.DocHtml{
+			Squad:     doc.Squad,
+			Projeto:   doc.Projeto,
+			Versao:    doc.Versao,
+			DocUrl:    filePath,
+			Descricao: doc.Descricao,
 		})
 	}
 
 	return templates.HomeHtml{
-		Docs:    docUrls,
+		Docs:    docs,
 		Results: result.Result,
 	}
 }

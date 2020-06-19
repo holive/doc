@@ -15,6 +15,11 @@ type Service struct {
 }
 
 func (s *Service) Create(ctx context.Context, folderPath string, filename string, document *DocApi) error {
+	res, _ := s.repo.Find(ctx, document.Projeto, document.Versao)
+	if res != nil && document.Projeto == res.Projeto && document.Squad != res.Squad {
+		return errors.New("project already exists in other squad")
+	}
+
 	doc, err := ioutil.ReadFile(path.Join(folderPath, filename))
 	if err != nil {
 		return errors.Wrap(err, "could not open document file")
@@ -33,7 +38,7 @@ func (s *Service) Create(ctx context.Context, folderPath string, filename string
 func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
 	exists := true
 
-	routePath := path.Join(doc.Squad, doc.Projeto, doc.Versao)
+	routePath := path.Join(doc.Projeto, doc.Versao)
 	folderPath := path.Join(FilesFolder, routePath)
 	filePath := path.Join(folderPath, FileName)
 	if _, err := os.Stat(filePath); err != nil {
@@ -50,7 +55,7 @@ func (s *Service) Find(ctx context.Context, doc *DocApi) (*DocApi, error) {
 		return doc, nil
 	}
 
-	res, err := s.repo.Find(ctx, doc.Squad, doc.Projeto, doc.Versao)
+	res, err := s.repo.Find(ctx, doc.Projeto, doc.Versao)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not find doc")
 	}
@@ -80,14 +85,25 @@ func (s *Service) SearchProject(ctx context.Context, project string, limit strin
 }
 
 func (s *Service) Delete(ctx context.Context, doc *DocApi) error {
-	filePath := path.Join(FilesFolder, doc.Squad, doc.Projeto, doc.Versao, FileName)
+	err := s.repo.Delete(ctx, doc.Squad, doc.Projeto, doc.Versao)
+	if err != nil {
+		return errors.Wrap(err, "could not delete")
+	}
 
-	err := os.Remove(filePath)
+	folderPath := path.Join(FilesFolder, doc.Projeto, doc.Versao)
+	filePath := path.Join(folderPath, FileName)
+
+	err = os.Remove(filePath)
 	if err != nil {
 		log.Printf("could not delete %s: %v", filePath, err)
 	}
 
-	return s.repo.Delete(ctx, doc.Squad, doc.Projeto, doc.Versao)
+	err = os.Remove(folderPath)
+	if err != nil {
+		log.Printf("could not delete %s: %v", folderPath, err)
+	}
+
+	return nil
 }
 
 func (s *Service) FindAll(ctx context.Context, limit string, offset string) (*SearchResult, error) {
